@@ -5,4 +5,4 @@ if TYPE_CHECKING:
 
 def init_utils(app: 'Flask') -> None:
     '''enables .models import'''
-    pass
+    return None
