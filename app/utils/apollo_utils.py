@@ -15,10 +15,12 @@ COMPANY_MATCH_URI_BULK = "https://api.apollo.io/api/v1/organizations/bulk_enrich
 
 PEOPLE_SEARCH_URI = "https://api.apollo.io/v1/mixed_people/search"
 
-MATCH_HEADERS : dict = {'Cache-Control': 'no-cache', 
+MATCH_HEADERS_NO_JSON : dict = {'Cache-Control': 'no-cache', 
                         'X-Api-Key': os.getenv("APOLLO_KEY")}
 
-MATCH_HEADERS_BULK : dict = {'Content-Type': 'application/json', 
+MATCH_HEADERS_JSON : dict = {'Content-Type': 'application/json', 
                                     'Cache-Control': 'no-cache', 
                                     'X-Api-Key': os.getenv("APOLLO_KEY")}
+
+APOLLO_MAX_RESULTS = os.getenv("APOLLO_MAX_RESULTS")
 
