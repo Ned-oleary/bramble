@@ -2,7 +2,7 @@ from flask import Flask
 from .models import init_models # may be able to remove this
 from .routes import register_routes
 from .utils import init_utils
-from .integrations import init_integrations
+from .utils import init_utils
 from .routes import register_routes
 
 def create_app() -> Flask:
@@ -10,7 +10,6 @@ def create_app() -> Flask:
     app.config.from_object("config.Config")
     init_models(app)
     init_utils(app)
-    init_integrations(app)
     register_routes(app)
     #CORS(app, supports_credentials=True, resources={r"/*": {"origins": "http://localhost:3000"}})
     return app
