@@ -20,30 +20,34 @@ PEOPLE_MATCH_BULK_HEADERS : dict = {'Content-Type': 'application/json',
 
 bp: Blueprint = Blueprint("apollo", import_name="apollo_routes", url_prefix="/api/apollo")
 
-@bp.route("/enrich/person", methods = ["POST"])
-def enrich_person() -> Tuple[str, int]:
-    data: dict = request.get_json()
-    payload_dict: dict = {}
-    if(data["choice"]) == "bulk":
-        payload_dict["details"] = data["details"]
-        url = PEOPLE_MATCH_URI_BULK
+@bp.route("/enrich/person", methods=["POST"])
+def enrich_person() -> Tuple[dict, int]:
+    data = request.get_json()
+
+    if data["choice"] == "bulk":
+        payload_dict = {"details": data["details"]}  
+        response = requests.post(url=PEOPLE_MATCH_URI_BULK, headers=PEOPLE_MATCH_BULK_HEADERS, json=payload_dict)
     else:
-        payload_dict = data["details"]
-        url = PEOPLE_MATCH_URI
-    response = requests.post(url=PEOPLE_MATCH_URI, headers=PEOPLE_MATCH_HEADERS, data=payload_dict)
-    if response.status_code == requests.codes.ok:
-        return response.json(), 201
+        response = requests.post(url=PEOPLE_MATCH_URI, headers=PEOPLE_MATCH_HEADERS, json=data["details"])  
+
+    if response.status_code == 200:  # Use 200 for clarity, although requests.codes.ok is also correct
+        return jsonify(response.json()), 201
     else:
         return response.text, response.status_code
 
 @bp.route("/enrich/company", methods = ["POST"])
-def enrich_company() -> Tuple[str, int]:
-    data = requests.json()
-    payload = data["domains"]
+def enrich_company() -> Tuple[dict, int]:
+    data = request.get_json()  # Correct way to get JSON data
+    payload = {"domains": data["domains"]}  # Ensure payload is correctly formatted as JSON
+
     if data["choice"] == "bulk":
-        pass
+        response = requests.post(url=COMPANY_MATCH_URI_BULK, headers=PEOPLE_MATCH_BULK_HEADERS, json=payload)
     else:
-        pass
-        
+        response = requests.get(url=COMPANY_MATCH_URI, headers=PEOPLE_MATCH_BULK_HEADERS, params={"domain": data["domains"][0]})
+
+    if response.status_code == 200:
+        return jsonify(response.json()), 201
+    else:
+        return response.text, response.status_code
         
 
