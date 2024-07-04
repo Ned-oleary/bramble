@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from typing import Tuple
 from ..utils.apollo_utils import PEOPLE_MATCH_URI, PEOPLE_MATCH_URI_BULK, COMPANY_MATCH_URI, \
                                 COMPANY_MATCH_URI_BULK, MATCH_HEADERS_NO_JSON, MATCH_HEADERS_JSON, \
-                                PEOPLE_SEARCH_URI, APOLLO_MAX_RESULTS
+                                PEOPLE_SEARCH_URI, APOLLO_MAX_RESULTS, APOLLO_MAX_RESULTS_PER_PAGE
 import requests
 from time import sleep
 
@@ -45,25 +45,30 @@ def enrich_company() -> Tuple[dict, int]:
 def search_people():
     try:
         data = request.get_json()
-        data["page"] = "1" # overwrite first call
-        data["per_page"] = "100" # force Apollo to give us the max results
+        data["page"] = 1 # always start with the first page
+        data["per_page"] = APOLLO_MAX_RESULTS_PER_PAGE # force Apollo to max the output per call
     
-        response = requests.post(url = PEOPLE_SEARCH_URI, headers = MATCH_HEADERS_JSON, json = data)
-        total_entries = int(response.json()["total_entries"])
+        all_people = []
+        num_total_people = 0
 
-        output = []
-        output.append(response.json()["people"])
-
-        if(total_entries > APOLLO_MAX_RESULTS):
-            return jsonify("Too many results"), 400
+        num_loops = 0
+        num_people_captured = 0
     
-        while (total_entries - len(output) > 0):
-            data["page"] = str(int(data["page"]) + 1)
+        while (num_loops == 0 or num_people_captured < num_total_people):
             response = requests.post(url = PEOPLE_SEARCH_URI, headers = MATCH_HEADERS_JSON, json = data)
-            output.append(response.json()["people"])
+            response_data = response.json()
+
+            if not num_loops:
+                num_total_people = int(response_data["total_entries"])
+            num_loops += 1
+
+            new_people = response_data["people"]
+            all_people.extend(new_people)
+            num_people_captured += len(new_people)
+
             # probably want some backoff here
-    
-        return jsonify(output), 200
+
+        return jsonify(all_people), 200
     
     except:
         return "Error", 400
