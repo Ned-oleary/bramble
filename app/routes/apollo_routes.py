@@ -26,6 +26,7 @@ def enrich_person() -> Tuple[dict, int]:
 # processes 10 max at a time
 @bp.route("/enrich/company", methods = ["POST"])
 def enrich_company() -> Tuple[dict, int]:
+    print("calling enrich_company()")
     data = request.get_json()  
     payload = {"domains": data["domains"]}
 
@@ -35,7 +36,8 @@ def enrich_company() -> Tuple[dict, int]:
         response = requests.get(url=apollo.COMPANY_MATCH_URI, headers=apollo.MATCH_HEADERS_JSON, params={"domain": data["domains"][0]})
 
     if response.status_code == 200:
-        return jsonify(response.json()), 201
+        print(response.json())
+        return response.json(), 201
     else:
         return response.text, response.status_code
     
