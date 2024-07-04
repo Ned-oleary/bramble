@@ -1,14 +1,9 @@
 from flask import Blueprint, jsonify, request
-from typing import Tuple, TYPE_CHECKING
-from ..models.person import generate_test_person
-from ..utils.apollo_utils import PEOPLE_MATCH_VALID_INPUTS, PEOPLE_MATCH_URI, \
-                                PEOPLE_MATCH_URI_BULK, COMPANY_MATCH_URI, \
-                                COMPANY_MATCH_URI_BULK, MATCH_HEADERS_NO_JSON, MATCH_HEADERS_JSON
+from typing import Tuple
+from ..utils.apollo_utils import PEOPLE_MATCH_URI, PEOPLE_MATCH_URI_BULK, COMPANY_MATCH_URI, \
+                                COMPANY_MATCH_URI_BULK, MATCH_HEADERS_NO_JSON, MATCH_HEADERS_JSON, \
+                                PEOPLE_SEARCH_URI
 import requests
-
-if TYPE_CHECKING:
-    from flask import Flask
-    from ..models.person import Person, generate_test_person
 
 bp: Blueprint = Blueprint("apollo", import_name="apollo_routes", url_prefix="/api/apollo")
 
@@ -43,5 +38,17 @@ def enrich_company() -> Tuple[dict, int]:
         return jsonify(response.json()), 201
     else:
         return response.text, response.status_code
+    
+# not available on free plan :(
+# will get 10 at a time
+@bp.route("/search/people", methods = ["POST"])
+def search_people():
+    #data = request.get_json()
+    #response = requests.post(url = PEOPLE_SEARCH_URI, headers = MATCH_HEADERS_JSON, json = data)
+    #if response.status_code == response.codes.ok:
+    #    return jsonify(response.json(), 200)
+    pass
+
+
         
 

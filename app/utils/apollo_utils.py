@@ -13,6 +13,8 @@ PEOPLE_MATCH_URI_BULK = "https://api.apollo.io/api/v1/people/bulk_match"
 COMPANY_MATCH_URI = "https://api.apollo.io/v1/organizations/enrich"
 COMPANY_MATCH_URI_BULK = "https://api.apollo.io/api/v1/organizations/bulk_enrich"
 
+PEOPLE_SEARCH_URI = "https://api.apollo.io/v1/mixed_people/search"
+
 MATCH_HEADERS : dict = {'Cache-Control': 'no-cache', 
                         'X-Api-Key': os.getenv("APOLLO_KEY")}
 
