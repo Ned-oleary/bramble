@@ -1,11 +1,10 @@
 from flask import Blueprint, jsonify, request
 from typing import Tuple
-from ..utils.apollo_utils import PEOPLE_MATCH_URI, PEOPLE_MATCH_URI_BULK, COMPANY_MATCH_URI, \
-                                COMPANY_MATCH_URI_BULK, MATCH_HEADERS_NO_JSON, MATCH_HEADERS_JSON, \
-                                PEOPLE_SEARCH_URI, APOLLO_MAX_RESULTS, APOLLO_MAX_RESULTS_PER_PAGE
+from ..configs.apollo_config import ApolloConfig
 import requests
 from time import sleep
 
+apollo = ApolloConfig()
 bp: Blueprint = Blueprint("apollo", import_name="apollo_routes", url_prefix="/api/apollo")
 
 # processes 10 max at a time
@@ -15,9 +14,9 @@ def enrich_person() -> Tuple[dict, int]:
 
     if data["choice"] == "bulk":
         payload_dict = {"details": data["details"]}  
-        response = requests.post(url=PEOPLE_MATCH_URI_BULK, headers=MATCH_HEADERS_JSON, json=payload_dict)
+        response = requests.post(url=apollo.PEOPLE_MATCH_URI_BULK, headers=apollo.MATCH_HEADERS_JSON, json=payload_dict)
     else:
-        response = requests.post(url=PEOPLE_MATCH_URI, headers=MATCH_HEADERS_NO_JSON, json=data["details"])  
+        response = requests.post(url=apollo.PEOPLE_MATCH_URI, headers=apollo.MATCH_HEADERS_NO_JSON, json=data["details"])  
 
     if response.status_code == 200:  # Use 200 for clarity, although requests.codes.ok is also correct
         return jsonify(response.json()), 201
@@ -31,9 +30,9 @@ def enrich_company() -> Tuple[dict, int]:
     payload = {"domains": data["domains"]}
 
     if data["choice"] == "bulk":
-        response = requests.post(url=COMPANY_MATCH_URI_BULK, headers=MATCH_HEADERS_JSON, json=payload)
+        response = requests.post(url=apollo.COMPANY_MATCH_URI_BULK, headers=apollo.MATCH_HEADERS_JSON, json=payload)
     else:
-        response = requests.get(url=COMPANY_MATCH_URI, headers=MATCH_HEADERS_JSON, params={"domain": data["domains"][0]})
+        response = requests.get(url=apollo.COMPANY_MATCH_URI, headers=apollo.MATCH_HEADERS_JSON, params={"domain": data["domains"][0]})
 
     if response.status_code == 200:
         return jsonify(response.json()), 201
@@ -46,7 +45,7 @@ def search_people():
     try:
         data = request.get_json()
         data["page"] = 1 # always start with the first page
-        data["per_page"] = APOLLO_MAX_RESULTS_PER_PAGE # force Apollo to max the output per call
+        data["per_page"] = apollo.APOLLO_MAX_RESULTS_PER_PAGE # force Apollo to max the output per call
     
         all_people = []
         num_total_people = 0
@@ -55,7 +54,7 @@ def search_people():
         num_people_captured = 0
     
         while (num_loops == 0 or num_people_captured < num_total_people):
-            response = requests.post(url = PEOPLE_SEARCH_URI, headers = MATCH_HEADERS_JSON, json = data)
+            response = requests.post(url = apollo.PEOPLE_SEARCH_URI, headers = apollo.MATCH_HEADERS_JSON, json = data)
             response_data = response.json()
 
             if not num_loops:
