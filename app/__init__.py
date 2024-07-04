@@ -3,7 +3,7 @@ from .models import init_models # may be able to remove this
 from .routes import register_routes
 from .utils import init_utils
 from .integrations import init_integrations
-#from flask_cors import CORS
+from .routes import register_routes
 
 def create_app() -> Flask:
     app = Flask(__name__)

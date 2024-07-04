@@ -71,7 +71,7 @@ def search_people():
         return jsonify(all_people), 200
     
     except:
-        return "Error", 400
+        return "Search people endpoint failed", 400
 
 
 
