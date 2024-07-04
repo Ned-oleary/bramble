@@ -21,6 +21,7 @@ class Person:
         self.state: str = None
         self.city: str = None
         self.country: str = None
+        self.domain: str = None
         self.departmental_head_count = {}
     
     def get_id(self, query:str = "uuid") -> str:
@@ -50,10 +51,10 @@ class Person:
             else:
                 warnings.warn("Invalid key for set_values(): " + key)
 
-    def to_dict(self, **kwargs: str) -> dict:
+    def to_dict(self, input_list: list) -> dict:
         return_dict = {}
         for keys, values in vars(self).items(): # messy to allow addition of new attributes
-            if keys in kwargs.keys():
+            if keys in input_list:
                 return_dict[keys] = values
         return return_dict
     
@@ -66,6 +67,18 @@ class Person:
                 else:
                     print(keys + ": dict")
         print("================================-")
+
+def generate_test_person() -> Person:
+    person = Person()
+    person.set_values(
+        city = "San Francisco",
+        state =  "California",
+        name = "Ned OLeary",
+        domain = "ssoready.com",
+        email = "ned.oleary@ssoready.com"
+    )
+    return person
+
 
 
 

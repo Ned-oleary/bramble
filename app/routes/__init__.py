@@ -6,4 +6,5 @@ if TYPE_CHECKING:
 
 def register_routes(app: 'Flask') -> None:
     '''enables .models import'''
+    app.register_blueprint(ar)
     return None
