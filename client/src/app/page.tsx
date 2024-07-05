@@ -15,7 +15,7 @@ import { Slider } from "@/components/ui/slider"
 
 export default function Home() {
 
-  const [domainList, setDomainList] = useState<string>("");
+  const [domainList, setDomainList] = useState<string[]>([]);
   const [jobTitlesList, setJobTitlesList] = useState<string>("");
   const [useOnlyNewContacts, setUseOnlyNewContacts] = useState<boolean>(false)
   const [maxDollars, setMaxDollars] = useState<number>(50);
@@ -43,7 +43,7 @@ export default function Home() {
       })
       .then(response => response.json())  // Convert to JSON
       .then(data => {
-        setResponseFromBackend(data.domains);  // Access the 'message' property
+        setResponseFromBackend(JSON.stringify(data.organizations));  // Access the 'message' property
       })    
   };
 
