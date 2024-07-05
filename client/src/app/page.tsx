@@ -15,24 +15,36 @@ import { Slider } from "@/components/ui/slider"
 
 export default function Home() {
 
-  interface HubspotSettings{
-    existsInHubspot: boolean;
-    notExistsInHubspot: boolean;
-  }
-
   const [domainList, setDomainList] = useState<string>("");
   const [jobTitlesList, setJobTitlesList] = useState<string>("");
-  const [hubspotSettings, setHubspotSettings] = useState<HubspotSettings>({existsInHubspot: false, notExistsInHubspot: true})
+  const [useOnlyNewContacts, setUseOnlyNewContacts] = useState<boolean>(false)
   const [maxDollars, setMaxDollars] = useState<number>(50);
+
+  const [responseFromBackend, setResponseFromBackend] = useState<string>("");
+
   const useEffect = () => {
     console.log("calling useEffect()");
   };
 
   const handleSubmitToBackend = async () => {
-    console.log(domainList);
-    console.log(jobTitlesList);
-    console.log(hubspotSettings.existsInHubspot);
-    console.log(maxDollars);
+    const data = {
+      domainList,
+      jobTitlesList,
+      useOnlyNewContacts,
+      maxDollars
+    }
+    const jsonString = JSON.stringify(data, null, 2);
+    console.log(jsonString);
+
+    fetch( `${process.env.NEXT_PUBLIC_BACKEND_URL}/handler/hello`, {
+        method : "POST",
+        headers : { 'Content-Type': 'application/json' },
+        body : jsonString,
+      })
+      .then(response => response.json())  // Convert to JSON
+      .then(data => {
+        setResponseFromBackend(data.domains);  // Access the 'message' property
+      })    
   };
 
   return (
@@ -50,12 +62,8 @@ export default function Home() {
             </CardDescription>
             <div className = "flex flex-col justify-center items-start py-2 my-3">
               <div className = "flex flex-row items-center justify-center py-1">
-                <Checkbox onClick = {() => {hubspotSettings.existsInHubspot = ! hubspotSettings.existsInHubspot}}/>
+                <Checkbox onClick = {() => {setUseOnlyNewContacts(!useOnlyNewContacts)}} />
                 <Label className = "px-2">Send to existing hubspot contacts?</Label>
-              </div>
-              <div className = "flex flex-row items-center justify-center py-1">
-                <Checkbox onClick = {() => {hubspotSettings.notExistsInHubspot = ! hubspotSettings.notExistsInHubspot}}/>
-                <Label className = "px-2">Send to new contacts?</Label>
               </div>
             </div>
             <div className="flex flex-col w-full max-w-sm items-center justify-center gap-1.5 my-3 py-2">
@@ -75,6 +83,9 @@ export default function Home() {
                 attempt to submit
               </Button>
             </div>
+            <p>
+              {responseFromBackend}
+            </p>
           </CardContent>   
         </Card>
       </div>
