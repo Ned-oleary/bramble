@@ -22,7 +22,7 @@ def enrich_person() -> Tuple[dict, int]:
         return response.text, response.status_code
 
 # processes 10 max at a time
-def enrich_company(domains: list[str], type: str) -> Tuple[dict, int]:
+def enrich_company(domains: list[str], type: str) -> dict[str]:
     print("calling enrich_company()")
     print(domains)
 
@@ -42,36 +42,40 @@ def enrich_company(domains: list[str], type: str) -> Tuple[dict, int]:
         return response.text
     
 # Apollo will only show up to 100 results at a time
-def search_people():
-    try:
-        data = request.get_json()
-        data["page"] = 1 # always start with the first page
-        data["per_page"] = apollo.APOLLO_MAX_RESULTS_PER_PAGE # force Apollo to max the output per call
+def search_people(query: dict[str, int]) -> dict[str]:
+    print("Calling search_people() utility")
+    print(query)
+
+    query["page"] = 1 # always start with the first page
+    query["per_page"] = 10 # force Apollo to max the output per call
     
-        all_people = []
-        num_total_people = 0
+    all_people = []
+    num_total_people = 0
 
-        num_loops = 0
-        num_people_captured = 0
+    num_loops = 0
+    num_people_captured = 0
     
-        while (num_loops == 0 or num_people_captured < num_total_people):
-            response = requests.post(url = apollo.PEOPLE_SEARCH_URI, headers = apollo.MATCH_HEADERS_JSON, json = data)
-            response_data = response.json()
+    while (num_loops == 0 or num_people_captured < num_total_people):
+        response = requests.post(url = apollo.PEOPLE_SEARCH_URI, headers = apollo.MATCH_HEADERS_JSON, json = query)
+        response_data = response.json()
+        print("looping " + str(num_loops))
 
-            if not num_loops:
-                num_total_people = int(response_data["total_entries"])
-            num_loops += 1
+        if not num_loops:
+            num_total_people = int(response_data["pagination"]["total_entries"])
+            print("total_entries: " + str(num_total_people))
+        num_loops += 1
 
-            new_people = response_data["people"]
-            all_people.extend(new_people)
-            num_people_captured += len(new_people)
+        new_people = response_data["people"]
+        all_people.extend(new_people)
+        num_people_captured += len(new_people)
 
-            # probably want some backoff here
+        # probably want some backoff here
 
-        return jsonify(all_people), 200
-    
-    except:
-        return "Search people endpoint failed", 400
+        if(num_loops > 1):
+            print("breaking loop")
+            break
+
+    return jsonify(all_people)
 
 
 

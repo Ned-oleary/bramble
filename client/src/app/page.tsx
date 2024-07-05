@@ -43,7 +43,7 @@ export default function Home() {
       })
       .then(response => response.json())  // Convert to JSON
       .then(data => {
-        setResponseFromBackend(JSON.stringify(data.organizations));  // Access the 'message' property
+        setResponseFromBackend(JSON.stringify(data.people[1]));  // Access the 'message' property
       })    
   };
 

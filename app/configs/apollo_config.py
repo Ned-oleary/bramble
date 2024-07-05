@@ -15,4 +15,4 @@ class ApolloConfig():
                                     'Cache-Control': 'no-cache', 
                                     'X-Api-Key': os.getenv("APOLLO_KEY")}
     APOLLO_MAX_RESULTS = os.getenv("APOLLO_MAX_RESULTS")
-    APOLLO_MAX_RESULTS_PER_PAGE = 100
+    APOLLO_MAX_RESULTS_PER_PAGE = 10
