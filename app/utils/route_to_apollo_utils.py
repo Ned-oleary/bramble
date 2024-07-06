@@ -46,8 +46,8 @@ def search_people(query: dict[str, int]) -> dict[str]:
     print("Calling search_people() utility")
     print(query)
 
-    query["page"] = 1 # always start with the first page
-    query["per_page"] = 10 # force Apollo to max the output per call
+    query["page"] = 1 
+    query["per_page"] = 5 
     
     all_people = []
     num_total_people = 0
