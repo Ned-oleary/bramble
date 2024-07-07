@@ -1,6 +1,4 @@
 from typing import TYPE_CHECKING
-from .apollo_routes import bp as ar
-from .thanks_io import bp as thx
 from .manager_routes import bp as manager
 
 if TYPE_CHECKING:
@@ -8,6 +6,4 @@ if TYPE_CHECKING:
 
 def register_routes(app: 'Flask') -> None:
     app.register_blueprint(manager)
-    app.register_blueprint(ar)
-    app.register_blueprint(thx)
     return None

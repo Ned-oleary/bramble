@@ -2,11 +2,12 @@ from flask import Blueprint, jsonify, request
 from typing import Tuple
 from ..configs.apollo_config import ApolloConfig
 import requests
-from time import sleep
 
 apollo = ApolloConfig()
 
 # processes 10 max at a time
+# should change just to use the bulk APi
+# won't get used, but should keep just in case
 def enrich_person() -> Tuple[dict, int]:
     data = request.get_json()
 
@@ -21,6 +22,7 @@ def enrich_person() -> Tuple[dict, int]:
     else:
         return response.text, response.status_code
 
+# should get rid of this and make it only use the bulk api -- otherwise it's just a pain in the ass
 # processes 10 max at a time
 def enrich_company(domains: list[str], type: str) -> dict[str]:
     print("calling enrich_company()")
@@ -42,12 +44,13 @@ def enrich_company(domains: list[str], type: str) -> dict[str]:
         return response.text
     
 # Apollo will only show up to 100 results at a time
+# we can definitely simplify this a bit
 def search_people(query: dict[str, int]) -> dict[str]:
     print("Calling search_people() utility")
     print(query)
 
     query["page"] = 1 
-    query["per_page"] = 5 
+    #query["per_page"] = 5 
     
     all_people = []
     num_total_people = 0

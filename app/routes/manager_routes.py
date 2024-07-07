@@ -17,7 +17,7 @@ def handler():
     
     people_search_domains = '\n'.join(domains)
     enriched_organizations = enrich_company(domains, "bulk")
-    enriched_organizations = strip_enrichment_json(enriched_organizations)
+    enriched_organizations = strip_enrichment_json(enriched_organizations) #should work now
 
     
     people_search_dict = {
@@ -30,16 +30,21 @@ def handler():
     people = search_people(people_search_dict) # we get the people from search
 
     enriched_org_lookup = {
-        org["domain"]: {"name": org["name"], "address": org["address"]}
-        for org in enriched_organizations
+        org["domain"]: {"name": org["name"], "address": org["address"]} # getting stuck here
+        for org in enriched_organizations # iterate over list -> convert into a dict keyed by a domain
     }
 
-    join = []
+    for orgs in enriched_organizations:
+        enriched_org_lookup["domain"] = {}
+
+
+    join = [] # empty list of enriched people
 
     for person in people:
-        if person["domain"] in enriched_org_lookup:
+        print(person)
+        if person["domain"] in enriched_org_lookup: # this will probably fail
             merge = {**person, **enriched_org_lookup[person["domain"]]}
-            join.append(merge)
+            join.append(merge) #add the dict that merges person with org
 
     print(join)
 
