@@ -74,6 +74,7 @@ def search_people(query: dict[str, int]) -> dict[str]:
 
         # probably want some backoff here
 
+        # for testing reasons; REMOVE
         if(num_loops > 1):
             print("breaking loop")
             break

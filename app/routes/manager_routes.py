@@ -4,6 +4,7 @@ from ..utils.manager_utils import strip_enrichment_json
 
 bp = Blueprint("manager", import_name="manager-routes", url_prefix="/handler")
 
+# need to break this up into a few utility functions -- too complicated at this point
 @bp.route("/hello", methods = ["POST"])
 def handler():
 
