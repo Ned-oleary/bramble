@@ -43,7 +43,7 @@ def process_input_json(request: Response) -> dict[str]:
     max_dollars = input_from_front_end["maxDollars"]
     return {"domains": domains, "job_titles": job_titles, "max_dollars": max_dollars, "hubspot_use_only_new_contacts": hubspot_use_only_new_contacts} 
 
-def gen_people_search_dict(domains: list[str], job_titles: list[str], page: int = 1, per_page: int = 10):
+def gen_people_search_dict(domains: list[dict[str]], job_titles: list[str], page: int = 1, per_page: int = 10):
     people_search_dict = {
         "q_organization_domains" : '\n'.join(domains),
         "page": page,
