@@ -48,9 +48,6 @@ def enrich_company(domains: list[str], type: str) -> dict[str]:
 def search_people(query: dict[str, int]) -> dict[str]:
     print("Calling search_people() utility")
     print(query)
-
-    query["page"] = 1 
-    #query["per_page"] = 5 
     
     all_people = []
     num_total_people = 0

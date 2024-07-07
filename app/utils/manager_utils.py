@@ -1,14 +1,17 @@
 from collections import defaultdict
 
-
 def construct_domain_enrichment_json(domains: list[str]) -> dict[str]:
+    print("calling construct_domain_enrichment_json()")
     return_dict = {
         "domains": domains,
         "choice": "bulk"
     }
     return return_dict
 
-# this can definitely be simpler!!!
+
+# TODO: nest these into the enrich util
+
+# TODO: rename this
 def strip_enrichment_json(enriched_organizations: dict[str], fields: list[str] = ["name", "street_address", "postal_code", "city", "state", "country",
                                                "linkedin_uid", "linkedin_url", "id", "primary_domain"], organization_domain: bool = True) -> list[str]:
     '''pass in a dict with a nested list, return the list, albeit with fewer fields'''    
@@ -21,6 +24,7 @@ def strip_enrichment_json(enriched_organizations: dict[str], fields: list[str] =
         return_list.append(temp_dict)
     return return_list
 
+#TODO: rename this 
 def strip_enrichment_json_to_dict(orgs_list: list[str]) -> dict[str]:
     '''takes list of dicts and changes to a dict of dicts, where domain is the key'''
     return_dict = defaultdict(dict)
