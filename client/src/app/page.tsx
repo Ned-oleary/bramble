@@ -10,9 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider"
 
-
-// /enrich/company
-
 export default function Home() {
 
   const [domainList, setDomainList] = useState<string[]>([]);
