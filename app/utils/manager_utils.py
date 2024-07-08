@@ -14,9 +14,6 @@ def construct_domain_enrichment_json(domains: list[str]) -> dict[str]:
     }
     return return_dict
 
-
-# TODO: nest these into the enrich util
-
 # TODO: rename this
 def strip_enrichment_json(enriched_organizations: dict[str], fields: list[str] = ["name", "street_address", "postal_code", "city", "state", "country",
                                                "linkedin_uid", "linkedin_url", "id", "primary_domain"], organization_domain: bool = True) -> list[str]:

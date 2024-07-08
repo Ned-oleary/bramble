@@ -9,17 +9,19 @@ bp = Blueprint("manager", import_name="manager-routes", url_prefix="/handler")
 def handler():
     processed_input = process_input_json(request)
     domains = processed_input["domains"]
+    job_titles = processed_input["job_titles"]
     
-    enriched_organizations = enrich_company(domains, "bulk")
-    enriched_organizations = strip_enrichment_json(enriched_organizations)
-    enriched_org_lookup = strip_enrichment_json_to_dict(enriched_organizations) # returns domain-indexed dict of dicts
-    
-    print(enriched_org_lookup) # this is broken
-    
-    people = search_people(gen_people_search_dict(domains = domains, job_titles = processed_input["job_titles"]))
+    people = search_people(gen_people_search_dict(domains = domains, job_titles = job_titles))
     people = people.get_json()
-    print(people)
+    organizations = []
 
-    merged_data = merge_org_dict_and_people_list(org_dict = enriched_org_lookup, people_list = people) #list
+    for person in people:
+        org_data = person.pop("organization")
+        for keys in org_data:
+            value = org_data[keys]
+            person["org_" + keys] = value
+            organizations.append({keys:value})
     
-    return jsonify(merged_data), 200
+    print(people)
+    print(jsonify(people))
+    return jsonify(people), 200
