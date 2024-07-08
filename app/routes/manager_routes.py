@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, Response
 from ..utils.route_to_apollo_utils import enrich_company, search_people
-from ..utils.manager_utils import strip_enrichment_json, strip_enrichment_json_to_dict, process_input_json, gen_people_search_dict, merge_org_dict_and_people_list
+from ..utils.manager_utils import process_input_json, gen_people_search_dict
 
 bp = Blueprint("manager", import_name="manager-routes", url_prefix="/handler")
 
@@ -21,7 +21,14 @@ def handler():
             value = org_data[keys]
             person["org_" + keys] = value
             organizations.append({keys:value})
+
+
+    # HS: create contacts
+
+    # HS: create companies
+
+    # generate subset for direct mailers
+
+    # thanks.io automate sending
     
-    print(people)
-    print(jsonify(people))
     return jsonify(people), 200
