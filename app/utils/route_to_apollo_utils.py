@@ -40,6 +40,27 @@ def search_people(query: dict[str, int]) -> dict[str]:
     return jsonify(all_people)
 
 
+def enrich_company(domains: list[str], type_arg: str) -> dict[str]:
+    print("calling enrich_company()")
+    print(domains)
+
+    domains = {"domains": domains}
+
+    if(type_arg == "bulk"):
+        print("calling bulk endpoing")
+        response = requests.post(url=apollo.COMPANY_MATCH_URI_BULK, headers=apollo.MATCH_HEADERS_JSON, json=domains)
+    else:
+        print("calling single endpoint")
+        response = requests.get(url=apollo.COMPANY_MATCH_URI, headers=apollo.MATCH_HEADERS_JSON, params={"domain": domains[0]})
+    print(response.json())
+
+    if response.status_code == 200: #problem here
+        return response.json()  # Make sure to convert to JSON
+    else:
+        return response.text
+    
+
+
 
         
 

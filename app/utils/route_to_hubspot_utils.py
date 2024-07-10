@@ -5,32 +5,86 @@ import requests
 
 hs = HubspotConfig()
 
-def create_contact() -> Tuple[str, int]:
-    data = request.get_json()
-    response = requests.post(url = hs.CONTACTS_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = data)
-    return jsonify(response.json())
+#need revision
+def create_contact(people_list: list[dict[str]]) -> dict[str]:
+    response = requests.post(url = hs.CONTACTS_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = people_list)
+    print(response.json())
+    return response.json()
 
-def create_company() -> Tuple[str, int]:
-    data = request.get_json()
-    response = requests.post(url = hs.COMPANY_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = data)
-    return jsonify(response.json())
+def create_company(company_list: list[dict[str]]) -> dict[str]:
+    response = requests.post(url = hs.COMPANIES_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = company_list)
+    print(response.json())
+    return response.json()
 
-def get_contacts() -> Tuple[str, int]:
-    data = request.get_json()
-    response = requests.get(url = hs.CONTACTS_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = data)
-    return jsonify(response.json())
+# def get_contacts() -> Tuple[str, int]:
+#     data = request.get_json()
+#     response = requests.get(url = hs.CONTACTS_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = data)
+#     return jsonify(response.json())
 
-def get_companies() -> Tuple[str, int]:
-    data = request.get_json()
-    response = requests.get(url = hs.COMPANIES_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = data)
-    return jsonify(response.json())
+# def get_companies() -> Tuple[str, int]:
+#     data = request.get_json()
+#     response = requests.get(url = hs.COMPANIES_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = data)
+#     return jsonify(response.json())
 
-def get_contacts() -> Tuple[str, int]:
-    data = request.get_json()
-    response = requests.patch(url = hs.CONTACTS_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = data)
-    return jsonify(response.json())
+def company_list_to_hs_list(company_list: list[dict[str]]) -> list[dict[str]]:
+    print("calling company_list_to_hs_list()")
+    return_company_list = []
+    for company in company_list:
+        company = {
+            "properties":
+            {
+                "name": company["name"],
+                "domain": company["primary_domain"],
+                "address": company["street_address"],
+                "city": company["city"],
+                "state": company["state"],
+                "country": company["country"],
+                "zip": company["postal_code"],
+                "linkedin_company_page": company["linkedin_url"],
+                "apollo_id" : company["id"]
+            }
+        }
+        return_company_list.append(company)
+    return return_company_list # can hubspot not tolerate multiple companies?
 
-def get_companies() -> Tuple[str, int]:
-    data = request.get_json()
-    response = requests.patch(url = hs.COMPANIES_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = data)
-    return jsonify(response.json())
+# wonder if hubspot is smart enough to make the association for me...\
+# currently hoping that hs_email_domain works
+# because I don't know the 
+def people_list_to_hs_list(people_list: list[dict[str]]) -> list[dict[str]]:
+    print("calling people list to hs list")
+    return_people_list = []
+    for person in people_list:
+        print(person)
+        person = {
+            "properties":{
+                "firstname": person["first_name"],
+                "lastname": person["last_name"],
+                "jobtitle": person["title"],
+                "address": person["org_street_address"],
+                "city": person["org_city"],
+                "state": person["org_state"],
+                "country": person["org_country"],
+                "zip": person["org_postal_code"],
+                "apollo_id" : person["id"],
+            }
+            ,
+            "associations": [
+                {
+                    "to":{
+                        "id" : person["org_hubspot_id"]
+
+                    },
+                    "types":[
+                        {
+                            "associationCategory" : "HUBSPOT_DEFINED",
+                            "associationTypeId": 279
+                        }
+                    ]
+                }
+            ]
+        }
+        return_people_list.append(person)
+    print("return_people_list:")
+    print(return_people_list)
+    return return_people_list
+
