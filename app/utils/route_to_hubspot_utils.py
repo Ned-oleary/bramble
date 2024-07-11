@@ -2,6 +2,7 @@ from ..configs.hubspot_config import HubspotConfig
 from flask import request, jsonify
 from typing import Tuple
 import requests
+import aiohttp
 
 hs = HubspotConfig()
 
@@ -16,15 +17,51 @@ def create_company(company_list: list[dict[str]]) -> dict[str]:
     print(response.json())
     return response.json()
 
-# def get_contacts() -> Tuple[str, int]:
-#     data = request.get_json()
-#     response = requests.get(url = hs.CONTACTS_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = data)
-#     return jsonify(response.json())
+async def get_contacts(property_list: list[str] = ["apollo_id", "firstname", "lastname"]) -> dict[str]:
+    print("calling get_contacts()")
+    url = hs.CONTACTS_URI
 
-# def get_companies() -> Tuple[str, int]:
-#     data = request.get_json()
-#     response = requests.get(url = hs.COMPANIES_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = data)
-#     return jsonify(response.json())
+    query_dict = {"properties" : property_list}
+
+    return_list = []
+    async with aiohttp.ClientSession() as session:
+        keep_getting = True
+        while keep_getting:
+            print("looping")
+            response = await session.get(url = url, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = query_dict)
+            response_results = await response.json()
+            response_results = response_results["results"]
+            print(response_results)
+            for results in response_results:
+                try:
+                    return_list.append(results["apollo_id"])
+                except(Exception) as e:
+                    print("had an issue with indexing apollo_id")
+                    pass
+                    
+            try:
+                next_url = await response.json()
+                next_url = next_url["paging"]["next"]["link"]
+                url = next_url
+            except(Exception) as e:
+                print("finished looping")
+                keep_getting = False
+    
+    return return_list
+
+
+
+    return response.json()
+
+def get_companies(property_list: list[str] = ["apollo_id", "domain"]) -> dict[str]:
+    print("calling get_companies()")
+    query_dict = {"properties" : []}
+    for properties in property_list:
+        (query_dict["properties"]).append(properties)
+    response = requests.get(url = hs.COMPANIES_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = query_dict)
+    print(response.json())
+    return response.json()
+
 
 def company_list_to_hs_list(company_list: list[dict[str]]) -> list[dict[str]]:
     print("calling company_list_to_hs_list()")
@@ -66,7 +103,7 @@ def people_list_to_hs_list(people_list: list[dict[str]]) -> list[dict[str]]:
                 "country": person["org_country"],
                 "zip": person["org_postal_code"],
                 "apollo_id" : person["id"],
-            }
+                }
             ,
             "associations": [
                 {
