@@ -7,19 +7,24 @@ import time
 
 hs = HubspotConfig()
 
-#need revision
 def create_contact(people_list: list[dict[str]]) -> dict[str]:
+    print("=======================")
+    print("Called create_contact()")
+    print("Input list was:\n")
+    print( people_list)
     response = requests.post(url = hs.CONTACTS_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = people_list)
+    print("Got response:")
+    print(response)
     print(response.json())
+    print("Finishing create_contact call!")
+    print("================================\n")
     return response.json()
 
 def create_company(company_list: list[dict[str]]) -> dict[str]:
     response = requests.post(url = hs.COMPANIES_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = company_list)
-    print(response.json())
     return response.json()
 
 # need to pass desired properties as params, comma separated
-
 async def get_contacts(property_list: list[str] = ["apollo_id", "firstname", "lastname"]) -> list[dict[str]]:
     wait_time = 1
     url = hs.CONTACTS_URI + "?properties="+ "%2C".join(property_list)
@@ -119,9 +124,11 @@ def company_list_to_hs_list(company_list: list[dict[str]]) -> list[dict[str]]:
 # currently hoping that hs_email_domain works
 # because I don't know the 
 def people_list_to_hs_list(people_list: list[dict[str]]) -> list[dict[str]]:
+    print("===============================")
     print("calling people list to hs list")
     return_people_list = []
     for person in people_list:
+        print("looping through people")
         print(person)
         person = {
             "properties":{
@@ -154,5 +161,7 @@ def people_list_to_hs_list(people_list: list[dict[str]]) -> list[dict[str]]:
         return_people_list.append(person)
     print("return_people_list:")
     print(return_people_list)
+    print("ending call")
+    print("========================================\n")
     return return_people_list
 

@@ -55,7 +55,7 @@ def handler():
     for input_person in hubspot_input_people:
         if(input_person["properties"]["apollo_id"] not in existing_hubspot_people):
             print("creating person!")
-            hubspot_response = create_contact(person)
+            hubspot_response = create_contact(input_person)
             print(hubspot_response)
         else:
             print("found someone that already exists!")
