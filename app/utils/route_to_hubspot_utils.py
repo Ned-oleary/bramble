@@ -8,16 +8,7 @@ import time
 hs = HubspotConfig()
 
 def create_contact(people_list: list[dict[str]]) -> dict[str]:
-    print("=======================")
-    print("Called create_contact()")
-    print("Input list was:\n")
-    print( people_list)
     response = requests.post(url = hs.CONTACTS_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = people_list)
-    print("Got response:")
-    print(response)
-    print(response.json())
-    print("Finishing create_contact call!")
-    print("================================\n")
     return response.json()
 
 def create_company(company_list: list[dict[str]]) -> dict[str]:
@@ -38,13 +29,9 @@ async def get_contacts(property_list: list[str] = ["apollo_id", "firstname", "la
             response_headers = response.headers
             if response_status == 429 or (response_status == 400 and 'X-HubSpot-RateLimit-Remaining' in response_headers):
                 print("Getting rate limited on contacts getter!")
-                print("Response status: " + str(response_status))
-                print(response_json)
-                print(wait_time)
                 time.sleep(wait_time)
                 wait_time = 2 * wait_time
             elif response_status == 200:
-                print("Good request on contacts getter")
                 wait_time = wait_time / 2
                 response_results = response_json["results"]
                 for results in response_results:
@@ -75,13 +62,9 @@ async def get_companies(property_list: list[str] = ["apollo_id", "domain"]) -> l
 
             if response_status == 429 or (response_status == 400 and 'X-HubSpot-RateLimit-Remaining' in response_headers):
                 print("Getting rate limited on companies getter!")
-                print("Response status: " + str(response_status))
-                print(response_json)
-                print(wait_time)
                 time.sleep(wait_time)
                 wait_time = 2 * wait_time
             elif response_status == 200:
-                print("Good request on companies getter")
                 wait_time = wait_time / 2
                 response_results = response_json["results"]
                 for results in response_results:
@@ -100,7 +83,6 @@ async def get_companies(property_list: list[str] = ["apollo_id", "domain"]) -> l
 
 
 def company_list_to_hs_list(company_list: list[dict[str]]) -> list[dict[str]]:
-    print("calling company_list_to_hs_list()")
     return_company_list = []
     for company in company_list:
         company = {
@@ -120,16 +102,9 @@ def company_list_to_hs_list(company_list: list[dict[str]]) -> list[dict[str]]:
         return_company_list.append(company)
     return return_company_list # can hubspot not tolerate multiple companies?
 
-# wonder if hubspot is smart enough to make the association for me...\
-# currently hoping that hs_email_domain works
-# because I don't know the 
 def people_list_to_hs_list(people_list: list[dict[str]]) -> list[dict[str]]:
-    print("===============================")
-    print("calling people list to hs list")
     return_people_list = []
     for person in people_list:
-        print("looping through people")
-        print(person)
         person = {
             "properties":{
                 "firstname": person["first_name"],
@@ -159,9 +134,5 @@ def people_list_to_hs_list(people_list: list[dict[str]]) -> list[dict[str]]:
             ]
         }
         return_people_list.append(person)
-    print("return_people_list:")
-    print(return_people_list)
-    print("ending call")
-    print("========================================\n")
     return return_people_list
 

@@ -12,14 +12,17 @@ def search_people(query: dict[str, int]) -> dict[str]:
     num_loops = 0
     num_people_captured = 0
     while (num_loops == 0 or num_people_captured < num_total_people):
-        response = requests.post(url = apollo.PEOPLE_SEARCH_URI, headers = apollo.MATCH_HEADERS_JSON, json = query)
-        response_data = response.json()
-        if not num_loops:
-            num_total_people = int(response_data["pagination"]["total_entries"])
-        num_loops += 1
-        new_people = response_data["people"]
-        all_people.extend(new_people)
-        num_people_captured += len(new_people)
+        try:
+            response = requests.post(url = apollo.PEOPLE_SEARCH_URI, headers = apollo.MATCH_HEADERS_JSON, json = query)
+            response_data = response.json()
+            if not num_loops:
+                num_total_people = int(response_data["pagination"]["total_entries"])
+            num_loops += 1
+            new_people = response_data["people"]
+            all_people.extend(new_people)
+            num_people_captured += len(new_people)
+        except(Exception) as e:
+            break
     return jsonify(all_people)
 
 
