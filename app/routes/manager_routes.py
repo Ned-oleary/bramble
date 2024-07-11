@@ -19,13 +19,18 @@ def handler():
     # people = search_people(gen_people_search_dict(domains = domains, job_titles = job_titles))
     # people = people.get_json()
 
-    existing_hubspot_people = asyncio.run(get_contacts())
+    existing_hubspot_people = asyncio.run(get_contacts()) # list here of just apollo IDs
+    print("=============================")
+    print("printing existing hubspot people")
     print(existing_hubspot_people)
+    print("=============================")
 
+    existing_hubspot_companies = asyncio.run(get_companies())
+    print("=============================")
+    print("printing existing hubspot companies")
+    print(existing_hubspot_companies)
+    print("=============================")
 
-
-
-    #existing_hubspot_companies = get_companies()
 
 
 
@@ -42,7 +47,6 @@ def handler():
     #                 values = org[keys]
     #                 person["org_" + keys] = values
     
-
     # hs_companies = company_list_to_hs_list(enriched_organizations)
 
     # # this is fucking stupid but I can't figure out how Hubspot wants you to handle multiple company records
@@ -64,9 +68,9 @@ def handler():
     #     hs_response = create_contact(person)
     #     print(hs_response)
 
-    # generate subset for direct mailers
+    # # generate subset for direct mailers
 
-    # thanks.io automate sending
+    # # thanks.io automate sending
     
     print("Okay, we're done")
     people = "stuff"

@@ -3,6 +3,7 @@ from flask import request, jsonify
 from typing import Tuple
 import requests
 import aiohttp
+import time
 
 hs = HubspotConfig()
 
@@ -17,50 +18,82 @@ def create_company(company_list: list[dict[str]]) -> dict[str]:
     print(response.json())
     return response.json()
 
+# need to pass desired properties as params, comma separated
+
 async def get_contacts(property_list: list[str] = ["apollo_id", "firstname", "lastname"]) -> dict[str]:
-    print("calling get_contacts()")
+    wait_time = 1
     url = hs.CONTACTS_URI
-
-    query_dict = {"properties" : property_list}
-
+    property_string = "?properties="+ "%2C".join(property_list)
     return_list = []
     async with aiohttp.ClientSession() as session:
         keep_getting = True
         while keep_getting:
-            print("looping")
-            response = await session.get(url = url, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = query_dict)
-            response_results = await response.json()
-            response_results = response_results["results"]
-            print(response_results)
-            for results in response_results:
+            response = await session.get(url = url+property_string, headers = hs.HUBSPOT_DEFAULT_HEADERS)
+            response_json = await response.json()
+            response_status = response.status
+            response_headers = response.headers
+            if response_status == 429 or (response_status == 400 and 'X-HubSpot-RateLimit-Remaining' in response_headers):
+                print("Getting rate limited on contacts getter!")
+                print("Response status: " + str(response_status))
+                print(response_json)
+                print(wait_time)
+                time.sleep(wait_time)
+                wait_time = 2 * wait_time
+            elif response_status == 200:
+                print("Good request on contacts getter")
+                wait_time = wait_time / 2
+                response_results = response_json["results"]
+                for results in response_results:
+                    apollo_id = results["properties"]["apollo_id"]
+                    if(apollo_id):
+                        return_list.append(apollo_id)
                 try:
-                    return_list.append(results["apollo_id"])
-                except(Exception) as e:
-                    print("had an issue with indexing apollo_id")
-                    pass
-                    
-            try:
-                next_url = await response.json()
-                next_url = next_url["paging"]["next"]["link"]
-                url = next_url
-            except(Exception) as e:
-                print("finished looping")
-                keep_getting = False
-    
+                    next_url = response_json["paging"]["next"]["link"]
+                    url = next_url
+                    property_string = ""
+                except KeyError:
+                    keep_getting = False
+            else:
+                raise("Unexpected response code " + response_status)
     return return_list
 
+async def get_companies(property_list: list[str] = ["apollo_id", "domain"]) -> dict[str]:
+    wait_time = 1
+    url = hs.COMPANIES_URI
+    property_string = "?properties="+ "%2C".join(property_list)
+    
+    return_list = []
+    async with aiohttp.ClientSession() as session:
+        keep_getting = True
+        while keep_getting:
+            response = await session.get(url = url+property_string, headers = hs.HUBSPOT_DEFAULT_HEADERS)
+            response_json = await response.json()
+            response_status = response.status
+            response_headers = response.headers
 
-
-    return response.json()
-
-def get_companies(property_list: list[str] = ["apollo_id", "domain"]) -> dict[str]:
-    print("calling get_companies()")
-    query_dict = {"properties" : []}
-    for properties in property_list:
-        (query_dict["properties"]).append(properties)
-    response = requests.get(url = hs.COMPANIES_URI, headers = hs.HUBSPOT_DEFAULT_HEADERS, json = query_dict)
-    print(response.json())
-    return response.json()
+            if response_status == 429 or (response_status == 400 and 'X-HubSpot-RateLimit-Remaining' in response_headers):
+                print("Getting rate limited on companies getter!")
+                print("Response status: " + str(response_status))
+                print(response_json)
+                print(wait_time)
+                time.sleep(wait_time)
+                wait_time = 2 * wait_time
+            elif response_status == 200:
+                print("Good request on companies getter")
+                wait_time = wait_time / 2
+                response_results = response_json["results"]
+                for results in response_results:
+                    apollo_id = results["properties"]["apollo_id"]
+                    return_list.append(apollo_id)
+                try:
+                    next_url = response_json["paging"]["next"]["link"]
+                    url = next_url
+                    property_string = ""
+                except KeyError:
+                    keep_getting = False
+            else:
+                raise("Unexpected response code " + response.status)
+    return return_list
 
 
 def company_list_to_hs_list(company_list: list[dict[str]]) -> list[dict[str]]:
