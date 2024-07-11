@@ -20,15 +20,14 @@ def create_company(company_list: list[dict[str]]) -> dict[str]:
 
 # need to pass desired properties as params, comma separated
 
-async def get_contacts(property_list: list[str] = ["apollo_id", "firstname", "lastname"]) -> dict[str]:
+async def get_contacts(property_list: list[str] = ["apollo_id", "firstname", "lastname"]) -> list[dict[str]]:
     wait_time = 1
-    url = hs.CONTACTS_URI
-    property_string = "?properties="+ "%2C".join(property_list)
+    url = hs.CONTACTS_URI + "?properties="+ "%2C".join(property_list)
     return_list = []
     async with aiohttp.ClientSession() as session:
         keep_getting = True
         while keep_getting:
-            response = await session.get(url = url+property_string, headers = hs.HUBSPOT_DEFAULT_HEADERS)
+            response = await session.get(url = url, headers = hs.HUBSPOT_DEFAULT_HEADERS)
             response_json = await response.json()
             response_status = response.status
             response_headers = response.headers
@@ -46,27 +45,25 @@ async def get_contacts(property_list: list[str] = ["apollo_id", "firstname", "la
                 for results in response_results:
                     apollo_id = results["properties"]["apollo_id"]
                     if(apollo_id):
-                        return_list.append(apollo_id)
+                        return_list.append({"apollo_id": apollo_id})
                 try:
                     next_url = response_json["paging"]["next"]["link"]
                     url = next_url
-                    property_string = ""
                 except KeyError:
                     keep_getting = False
             else:
                 raise("Unexpected response code " + response_status)
     return return_list
 
-async def get_companies(property_list: list[str] = ["apollo_id", "domain"]) -> dict[str]:
+async def get_companies(property_list: list[str] = ["apollo_id", "domain"]) -> list[dict[str]]:
     wait_time = 1
-    url = hs.COMPANIES_URI
-    property_string = "?properties="+ "%2C".join(property_list)
+    url = hs.COMPANIES_URI + "?properties="+ "%2C".join(property_list)
     
     return_list = []
     async with aiohttp.ClientSession() as session:
         keep_getting = True
         while keep_getting:
-            response = await session.get(url = url+property_string, headers = hs.HUBSPOT_DEFAULT_HEADERS)
+            response = await session.get(url = url, headers = hs.HUBSPOT_DEFAULT_HEADERS)
             response_json = await response.json()
             response_status = response.status
             response_headers = response.headers
@@ -84,11 +81,12 @@ async def get_companies(property_list: list[str] = ["apollo_id", "domain"]) -> d
                 response_results = response_json["results"]
                 for results in response_results:
                     apollo_id = results["properties"]["apollo_id"]
-                    return_list.append(apollo_id)
+                    domain = results["properties"]["domain"]
+                    hubspot_id = results["id"]
+                    return_list.append({"apollo_id": apollo_id, "domain": domain, "hubspot_id": hubspot_id})
                 try:
                     next_url = response_json["paging"]["next"]["link"]
                     url = next_url
-                    property_string = ""
                 except KeyError:
                     keep_getting = False
             else:
